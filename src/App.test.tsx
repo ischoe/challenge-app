@@ -15,17 +15,17 @@ describe('<App />', () => {
     expect(appLoadedWrapper).not.toBeInTheDocument()
   })
 
-  it('should fetch data', async() => {
+  it('should fetch data', async () => {
     jest.useFakeTimers()
     const mockedData = {
-      data: mockCompanies
+      data: mockCompanies,
     }
-    jest.spyOn(global, "fetch").mockImplementation(() => {
-      return Promise.resolve({
-        json: () => Promise.resolve(mockedData)
+    global.fetch = jest.fn(() =>
+      Promise.resolve({
+        json: () => Promise.resolve(mockedData),
       })
-    })
-    
+    ) as jest.Mock
+
     await act(async () => {
       render(<App />)
     })
@@ -48,4 +48,3 @@ describe('<App />', () => {
     jest.useRealTimers()
   })
 })
-

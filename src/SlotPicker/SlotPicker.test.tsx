@@ -5,15 +5,8 @@ const mockCompanies = companies
 
 describe('<SlotPicker />', () => {
   it('should render company columns', () => {
-    render(<SlotPicker companies={mockCompanies}/>)
+    render(<SlotPicker companies={mockCompanies} />)
     const companies = screen.getAllByTestId('company-column')
     expect(companies).toHaveLength(2)
   })
-
-  // it('should render company columns', () => {
-  //   render(<SlotPicker companies={mockCompanies}/>)
-  //   const companies = screen.getAllByTestId('company-column')
-  //   expect(companies).toHaveLength(2)
-  // })
 })
-

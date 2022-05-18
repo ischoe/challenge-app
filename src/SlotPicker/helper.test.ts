@@ -1,7 +1,8 @@
-import { 
-  updateBlockedSlots, 
-  groupSlotsByDate, 
-  isBlockedSlot
+import {
+  updateBlockedSlots,
+  groupSlotsByDate,
+  isBlockedSlot,
+  parseDate,
 } from './helper'
 import { multipleDayTimeSlots } from './mockData'
 const mockTimeSlots = multipleDayTimeSlots
@@ -12,13 +13,10 @@ describe('helper functions', () => {
       const newSlot = {
         id: 1,
         start_time: '1',
-        end_time: '2'
+        end_time: '2',
       }
       const existingSlots = []
-      const result = updateBlockedSlots(
-        existingSlots, 
-        newSlot
-      )
+      const result = updateBlockedSlots(existingSlots, newSlot)
       expect(result.length).toBe(1)
       expect(result[0]).toEqual(newSlot)
     })
@@ -27,18 +25,15 @@ describe('helper functions', () => {
       const newSlot1 = {
         id: 1,
         start_time: '1',
-        end_time: '2'
+        end_time: '2',
       }
       const newSlot2 = {
         id: 2,
         start_time: '1',
-        end_time: '2'
+        end_time: '2',
       }
       const existingSlots = [newSlot1]
-      const result = updateBlockedSlots(
-        existingSlots, 
-        newSlot2
-      )
+      const result = updateBlockedSlots(existingSlots, newSlot2)
       expect(result.length).toBe(2)
       expect(result[0]).toEqual(newSlot1)
       expect(result[1]).toEqual(newSlot2)
@@ -48,20 +43,33 @@ describe('helper functions', () => {
       const newSlot = {
         id: 1,
         start_time: '1',
-        end_time: '2'
+        end_time: '2',
       }
       const updatedSlot = {
         id: 1,
         start_time: '2',
-        end_time: '3'
+        end_time: '3',
       }
       const existingSlots = [newSlot]
-      const result = updateBlockedSlots(
-        existingSlots, 
-        updatedSlot
-      )
+      const result = updateBlockedSlots(existingSlots, updatedSlot)
       expect(result.length).toBe(1)
       expect(result[0]).toEqual(updatedSlot)
+    })
+
+    it('should remove existing blocked slot, when selected changed to null', () => {
+      const newSlot = {
+        id: 1,
+        start_time: '1',
+        end_time: '2',
+      }
+      const updatedSlot = {
+        id: 1,
+        start_time: '1',
+        end_time: '2',
+      }
+      const existingSlots = [newSlot]
+      const result = updateBlockedSlots(existingSlots, updatedSlot)
+      expect(result.length).toBe(0)
     })
   })
 
@@ -80,12 +88,12 @@ describe('helper functions', () => {
         {
           id: 2,
           start_time: '2018-07-09T08:00:00.000+02:00',
-          end_time: '2018-07-09T08:30:00.000+02:00'
-        }
+          end_time: '2018-07-09T08:30:00.000+02:00',
+        },
       ]
       const currentSlot = {
-        start_time: "2018-07-09T08:00:00.000+02:00",
-        end_time: "2018-07-09T09:30:00.000+02:00"
+        start_time: '2018-07-09T08:00:00.000+02:00',
+        end_time: '2018-07-09T09:30:00.000+02:00',
       }
       const result = isBlockedSlot(blockedSlots, currentSlot, 1)
       expect(result).toBe(true)
@@ -96,12 +104,12 @@ describe('helper functions', () => {
         {
           id: 1,
           start_time: '2018-07-09T08:00:00.000+02:00',
-          end_time: '2018-07-09T08:30:00.000+02:00'
-        }
+          end_time: '2018-07-09T08:30:00.000+02:00',
+        },
       ]
       const currentSlot = {
-        start_time: "2018-07-09T08:00:00.000+02:00",
-        end_time: "2018-07-09T09:30:00.000+02:00"
+        start_time: '2018-07-09T08:00:00.000+02:00',
+        end_time: '2018-07-09T09:30:00.000+02:00',
       }
       const result = isBlockedSlot(blockedSlots, currentSlot, 1)
       expect(result).toBe(false)
@@ -112,15 +120,38 @@ describe('helper functions', () => {
         {
           id: 2,
           start_time: '2018-07-09T08:00:00.000+02:00',
-          end_time: '2018-07-09T08:30:00.000+02:00'
-        }
+          end_time: '2018-07-09T08:30:00.000+02:00',
+        },
       ]
       const currentSlot = {
-        start_time: "2018-07-09T09:00:00.000+02:00",
-        end_time: "2018-07-09T09:30:00.000+02:00"
+        start_time: '2018-07-09T09:00:00.000+02:00',
+        end_time: '2018-07-09T09:30:00.000+02:00',
       }
       const result = isBlockedSlot(blockedSlots, currentSlot, 1)
       expect(result).toBe(false)
     })
+
+    it('should return false if the blocked slot is only touching the current slot', () => {
+      const blockedSlots = [
+        {
+          id: 2,
+          start_time: '2018-07-09T08:00:00.000+02:00',
+          end_time: '2018-07-09T08:30:00.000+02:00',
+        },
+      ]
+      const currentSlot = {
+        start_time: '2018-07-09T08:30:00.000+02:00',
+        end_time: '2018-07-09T09:00:00.000+02:00',
+      }
+      const result = isBlockedSlot(blockedSlots, currentSlot, 1)
+      expect(result).toBe(false)
+    })
+  })
+
+  describe('parseDate', () => {
+    expect(parseDate('2018-07-09T08:00:00.000+02:00')).toBe('08:00')
+    expect(parseDate('2018-07-09T08:30:00.000+02:00')).toBe('08:30')
+    expect(parseDate('2018-07-09T12:30:00.000+02:00')).toBe('12:30')
+    expect(parseDate('2018-07-09T15:05:00.000+02:00')).toBe('15:05')
   })
 })
